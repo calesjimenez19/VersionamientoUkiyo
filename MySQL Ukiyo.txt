@@ -1,0 +1,124 @@
+Create Database Ukiyoshop;
+USE Ukiyoshop;
+CREATE TABLE CLIENTE (
+ID_cliente Varchar (10) Not Null,
+Nombre_cliente Varchar (10) Not Null,
+Apellido_cliente Varchar (10) Not Null,
+Direccion Varchar (10)  Null,
+Telefono Numeric  Null,
+Correo Varchar (20) Null,
+PRIMARY KEY (ID_cliente)
+)
+
+CREATE TABLE ASESORIA (
+ID_asesoria varchar (10) Not Null,
+Fecha_asesoria Date  Not Null,
+Titulo Varchar (10) Null,
+Foro Varchar (10) Null,
+Posicion Int  Null,
+Estado Varchar (10) Null,
+Descripcion Varchar (10) Null,
+ID_cliente Varchar (10) Not Null,
+PRIMARY KEY (ID_asesoria),
+FOREIGN KEY (ID_cliente) REFERENCES CLIENTE(ID_cliente)
+)
+CREATE TABLE CARRITO_DE_COMPRAS (
+ID_carrito varchar (10) Not Null,
+Cantidad_productos Numeric (10) Not Null,
+ID_cliente Varchar (10) Not Null,
+PRIMARY KEY (ID_carrito),
+FOREIGN KEY (ID_cliente) REFERENCES CLIENTE(ID_cliente)
+)
+CREATE TABLE PUNTOS (
+ID_puntos varchar (10) Not Null,
+Fecha_Vencimiento date Not Null,
+Cantidad_puntos Numeric (20) Null,
+ID_carrito varchar (10) Not Null,
+PRIMARY KEY (ID_puntos),
+FOREIGN KEY (ID_carrito) REFERENCES CARRITO_DE_COMPRAS(ID_carrito)
+)
+CREATE TABLE OFERTA (
+Mensaje_correo char (50) Null,
+Fecha_Vencimiento date Null,
+Monto  decimal Null,
+ID_oferta varchar (10) Not Null,
+ID_cliente Varchar (10) Not Null,
+PRIMARY KEY (ID_oferta),
+FOREIGN KEY (ID_cliente) REFERENCES CLIENTE(ID_cliente)
+)
+CREATE TABLE CANJEDEPUNTOS (
+Id_canje varchar (10) Not null,
+Producto_Canje Varchar (50) Null,
+ID_puntos varchar (10) Not Null,
+PRIMARY KEY (Id_canje),
+FOREIGN KEY (ID_puntos) REFERENCES PUNTOS(ID_puntos)
+)
+CREATE TABLE PRODUCTO (
+ID_producto Varchar (10) Not Null,
+Nombre_producto varchar (10) not null,
+Tamaño numeric null,
+color varchar (20) null,
+ID_carrito varchar (10) Not Null,
+Id_canje varchar (10) Not null,
+PRIMARY KEY (ID_producto),
+FOREIGN KEY (Id_canje) REFERENCES CANJEDEPUNTOS(Id_canje),
+FOREIGN KEY (ID_carrito) REFERENCES CARRITO_DE_COMPRAS(ID_carrito)
+)
+
+CREATE TABLE DETALLE (
+Fecha_Compra_Producto date not null,
+Valor_Costo decimal not null,
+valor_Venta decimal not null,
+Cantidad_Producto_Ingresado int null,
+ID_producto Varchar (10) Not Null,
+ID_Detalle Varchar (10) Not Null,
+PRIMARY KEY (ID_Detalle),
+FOREIGN KEY (ID_producto) REFERENCES PRODUCTO(ID_producto)
+)
+
+CREATE TABLE FACTURA (
+ID_Factura varchar (10) not null,
+Impuestos decimal not null,
+Fecha_Compra date not null,
+Monto decimal not null,
+ID_Pago varchar (10) not null,
+ID_carrito varchar (10) Not Null,
+PRIMARY KEY (ID_Factura),
+FOREIGN KEY (ID_carrito) REFERENCES CARRITO_DE_COMPRAS(ID_carrito)
+)
+CREATE TABLE PAGO (
+ID_Pago varchar (10) not null,
+Monto decimal not null,
+Tarjeta Varchar (20)  null,
+Giro_Acumulable varchar (20) null,
+Efectivo varchar (10) null,
+Pagos_en_linea varchar (10) null,
+ID_Factura varchar (10) not null,
+PRIMARY KEY (ID_Pago),
+FOREIGN KEY (ID_Factura) REFERENCES FACTURA(ID_Factura)
+)
+
+CREATE TABLE PRODUCTO_INGRESO (
+ID_producto Varchar (10) Not Null,
+ID_Ingresoproducto varchar (10) not null,
+ID_ingreso varchar (10) not null,
+PRIMARY KEY (ID_ingreso),
+FOREIGN KEY (ID_producto) REFERENCES PRODUCTO(ID_producto),
+FOREIGN KEY (ID_Ingresoproducto) REFERENCES INGRESO(ID_Ingresoproducto)
+)
+
+CREATE TABLE INGRESO (
+ID_Ingresoproducto varchar (10) not null,
+CODI_producto varchar (10) not null,
+PRIMARY KEY (ID_Ingresoproducto)
+)
+
+CREATE TABLE LOGEO (
+ID_CLIENTE varchar (10) not null,
+contraseña_cliente varchar (20) not null,
+PRIMARY KEY (ID_CLIENTE)
+)
+
+
+
+
