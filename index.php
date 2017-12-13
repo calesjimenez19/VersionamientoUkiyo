@@ -1,35 +1,46 @@
 <?php
-  //Se incluye la configuración de conexión a datos en el
-  //SGBD: MariaDB.
-  require_once 'model/database.php';
-  require_once 'model/security.php';
 
-  //Para registrar productos es necesario iniciar los proveedores
-  //de los mismos, por ello la variable controller para este
-  //ejercicio se inicia con el 'proveedor'.
-  $controller = 'home';
 
-  // Todo esta lógica hara el papel de un FrontController
-  if(!isset($_REQUEST['c']))
-  {
-    //Llamado de la página principal
-    require_once "controller/$controller.controller.php";
-    $controller = ucwords($controller) . 'Controller';
-    $controller = new $controller;
-    $controller->Index();
-  }
-  else
-  {
-    // Obtiene el controlador a cargar
-    $controller = strtolower($_REQUEST['c']);
-    $accion = isset($_REQUEST['a']) ? $_REQUEST['a'] : 'Index';
+include 'plantillaproductos.php';
+require 'conexion.php';
 
-    // Instancia el controlador
-    require_once "controller/$controller.controller.php";
-    $controller = ucwords($controller) . 'Controller';
-    $controller = new $controller;
+$query = "SELECT idproducto, idcategoria,codigo,nombre,stock,descripcion,estado FROM producto ";
+$resultado = $mysqli->query($query);
 
-    // Llama la accion
-    call_user_func( array( $controller, $accion ) );
-  }
-  
+$pdf = new PDF ();
+$pdf->AliasNbPages();
+$pdf->AddPage ();
+$pdf->SetFillColor(232,232,232);
+$pdf->SetFont ('Arial', 'B', 8);
+
+
+	$pdf->SetFillColor(232,232,232);
+	$pdf->SetFont('Arial','B',8);
+	$pdf->Cell(30,6,'IDPRODUCTO',1,0,'C',1);
+	$pdf->Cell(30,6,'IDCATEGORIA',1,0,'C',1);
+        $pdf->Cell(30,6,'CODIGO',1,0,'C',1);
+	$pdf->Cell(30,6,'NOMBRE',1,0,'C',1);
+	$pdf->Cell(30,6,'DESCRIPCION',1,0,'C',1);
+        
+        $pdf->Cell(20,6,'ESTADO',1,1,'C',1);
+
+
+
+
+
+	while($row = $resultado->fetch_assoc())
+	{
+		$pdf->Cell(30,6,utf8_decode($row['idproducto']),1,0,'C');
+		$pdf->Cell(30,6,$row['idcategoria'],1,0,'C');
+		$pdf->Cell(30,6,utf8_decode($row['codigo']),1,0,'C');
+		$pdf->Cell(30,6,utf8_decode($row['nombre']),1,0,'C');
+		$pdf->Cell(30,6,utf8_decode($row['descripcion']),1,0,'C');
+                
+        $pdf->Cell(20,6,utf8_decode($row['estado']),1,1,'C');
+	}
+
+
+$pdf->Output ();
+
+
+?>

@@ -1,50 +1,153 @@
-<section></section>
-<div class="container">
-    
- 
+<?php
 
-<h1 class="page-header">Productos </h1>
+class producto {
+
+    private $pdo;
+    public $idproducto;
+    public $idcategoria;
+    public $codigo;
+    public $nombre;
+    public $stock;
+    public $descripcion;
+    public $imagen;
+    public $estado;
+    public $precio;
+
+    public function __CONSTRUCT() {
+        try {
+            $this->pdo = Database::Conectar();
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function Listar() {
+        try {
+            $result = array();
+
+            $stm = $this->pdo->prepare("SELECT * FROM producto");
+            $stm->execute();
+
+            return $stm->fetchAll(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function Obtener($idproducto) {
+        try {
+            $stm = $this->pdo->prepare("SELECT * FROM producto WHERE idproducto = ?");
+            $stm->execute(array($idproducto));
+            return $stm->fetch(PDO::FETCH_OBJ);
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function Eliminar($idproducto) {
+        try {
+            $stm = $this->pdo
+                    ->prepare("DELETE FROM producto WHERE idproducto = ?");
+
+            $stm->execute(array($idproducto));
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function Actualizar($data) {
+        try {
+            $sql = "UPDATE producto SET
+						
+						codigo        = ?,
+						nombre        = ?,
+						descripcion        = ?,
+						imagen        = ?,
+                                                estado        = ?,
+					
+            precio        = ?
+				    WHERE idproducto = ?";
+
+            $this->pdo->prepare($sql)
+                    ->execute(
+                            array(
+                                $data->codigo,
+                                $data->nombre,
+                                $data->descripcion,
+                                $data->imagen,
+                                $data->estado,
+                                $data->precio,
+                                $data->idproducto
+                            )
+            );
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
+    }
+
+    public function Registrar(producto $data) {
+        try {
+            $sql = "INSERT INTO producto (idcategoria,codigo,nombre,stock,descripcion,imagen,estado,precio)
+		        VALUES (?, ?, ?,?,?,?,?,?)";
 
 
 
-<table class="table table-striped">
-    
+            $this->pdo->prepare($sql)
+                    ->execute(
+                            array(
+                                $data->idcategoria,
+                                $data->codigo,
+                                $data->nombre,
+                                $data->stock,
+                                $data->descripcion,
+                                $data->imagen,
+                                $data->estado,
+                                $data->precio
+                            )
+            );
+        } catch (Exception $e) {
+            die($e->getMessage());
+        }
 
-    <thead>
-        <tr>
-            <th style="width:180px;">idproducto</th>
-            <th style="width:120px;">idcategoria</th>
-            <th style="width:120px;">codigo</th>
-            <th style="width:120px;">nombre</th>
-            <th style="width:120px;">stock</th>
-            <th style="width:120px;">descripcion</th>
-            <th style="width:120px;">imagen</th>
-            <th style="width:120px;">estado</th>
-            <th style="width:120px;">precio</th>
-        </tr>
-    </thead>
-    <tbody>
-    <?php foreach($this->model->Listar() as $r): ?>
-        <tr>
-            <td><?php echo $r->idproducto; ?></td>
-            <td><?php echo $r->idcategoria; ?></td>
-            <td><?php echo $r->codigo; ?></td>
-            <td><?php echo $r->nombre; ?></td>
-            <td><?php echo $r->stock; ?></td>
-            <td><?php echo $r->descripcion; ?></td>
-            <td><?php echo $r->imagen; ?></td>
-            <td><?php echo $r->estado; ?></td>
-            <td><?php echo $r->precio; ?></td>
-            
-            <td>
-                <a href="?c=producto&a=Crud&idproducto=<?php echo $r->idproducto; ?>">Editar</a>
-            </td>
-            <td>
-                <a onclick="javascript:return confirm('¿Seguro de eliminar este registro?');" href="?c=producto&a=Eliminar&idproducto=<?php echo $r->idproducto; ?>">Eliminar</a>
-            </td>
-        </tr>
-    <?php endforeach; ?>
-    </tbody>
-</table>
-<a class="btn btn-primary" href="http://localhost:8080/phpmyadmin/amaterasuclases/pdf/">Importar pdf</a>
-<section></section>
+        $resultado = "";
+        $id_insert = $this->pdo->lastInsertId();
+
+
+        if ($_FILES["archivo"]["error"] > 0) {
+            echo "Error al cargar archivo";
+        } else {
+
+            $permitidos = array("image/gif", "image/png", "image/jpeg");
+            $limite_kb = 1000;
+
+            if (in_array($_FILES["archivo"]["type"], $permitidos)  && $_FILES["archivo"]["size"] <= $limite_kb * 1024) {
+
+                $ruta = 'files/' . $id_insert . '/';
+                $archivo = $ruta . $_FILES["archivo"]["name"];
+
+                $data->imagen = $archivo;
+                $data->idproducto = $id_insert;
+                if (!file_exists($ruta)) {
+                    mkdir($ruta);
+                }
+
+                if (!file_exists($archivo)) {
+
+                    $resultado = @move_uploaded_file($_FILES["archivo"]["tmp_name"], $archivo);
+
+                    if ($resultado) {
+                        echo "Archivo Guardado";
+                        $this->Actualizar($data);
+                    } else {
+                        echo "Error al guardar archivo";
+                    }
+                } else {
+                    echo "Archivo ya existe";
+                }
+            } else {
+                echo "Archivo no permitido o excede el tamaño";
+            }
+        }
+    }
+
+}
